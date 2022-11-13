@@ -22,50 +22,67 @@ class TravelView extends StatelessWidget {
         listener: (context, state) {},
         builder: (context, state) {
           return Scaffold(
-            appBar: AppBar(),
-            body: Padding(
-                padding: context.paddingLow,
-                child: Column(
-                  children: [
-                    Text(_data1, style: context.textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold)),
-                    TextField(
-                      onChanged: ((value) {
-                        return context.read<TravelCubit>().searchByItems(value);
-                      }),
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    context.emptySizedHeightBoxLow,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(_data2, style: context.textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold)),
-                        InkWell(
-                          child: Text(_data3, style: context.textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold)),
-                          onTap: () {
-                            context.read<TravelCubit>().seeAllItems();
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: context.dynamicHeight(0.26), child: _buildItemsCastle(context)),
-                    Expanded(
-                        child: ListView.builder(
-                            itemCount: state is TravelItemsSeeAll ? state.images.length : 0,
-
-                            
-                            itemBuilder: (context, index) {
-                              final image = (state as TravelItemsSeeAll).images[index];
-                              return Image.asset(image);
-                            })),
-                  ],
-                )),
+            appBar: AppBar(
+              centerTitle: true,
+              title: state is TravelLoading
+                  ? CircularProgressIndicator(
+                      color: context.colorScheme.onSecondary,
+                    )
+                  : SizedBox(),
+            ),
+            body: _buildBodyWidget(context, state),
           );
         },
       ),
     );
+  }
+
+  Padding _buildBodyWidget(BuildContext context, TravelStates state) {
+    return Padding(
+              padding: context.paddingLow,
+              child: Column(
+                children: [
+                  Text(_data1, style: context.textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold)),
+                  TextField(
+                    onChanged: ((value) {
+                      return context.read<TravelCubit>().searchByItems(value);
+                    }),
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  context.emptySizedHeightBoxLow,
+                  _buildRowWidget(context),
+                  SizedBox(height: context.dynamicHeight(0.26), child: _buildItemsCastle(context)),
+                  _buildSeeAllImagesWidget(state),
+                ],
+              ));
+  }
+
+  Expanded _buildSeeAllImagesWidget(TravelStates state) {
+    return Expanded(
+                      child: ListView.builder(
+                          itemCount: state is TravelItemsSeeAll ? state.images.length : 0,
+                          itemBuilder: (context, index) {
+                            final image = (state as TravelItemsSeeAll).images[index];
+                            return Image.asset(image);
+                          }));
+  }
+
+  Row _buildRowWidget(BuildContext context) {
+    return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_data2, style: context.textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold)),
+                      InkWell(
+                        child: Text(_data3, style: context.textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold)),
+                        onTap: () {
+                          context.read<TravelCubit>().seeAllItems();
+                        },
+                      ),
+                    ],
+                  );
   }
 
   Widget _buildItemsCastle(BuildContext context) {
@@ -77,7 +94,6 @@ class TravelView extends StatelessWidget {
             itemCount: state.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-                 
               return Card(
                 child: SizedBox(
                   width: context.dynamicWidth(0.37),
